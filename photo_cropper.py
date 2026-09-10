@@ -474,13 +474,24 @@ def generate_debug_images(input_dir=INPUT_DIR, debug_dir=DEBUG_DIR, manifest_pat
     print(f"Saved debug images for all scans in '{debug_dir}'.")
 
 
+ONNX_MODEL_PATH = os.path.join(SCRIPT_DIR, "orientation_duarte.onnx")
+DUARTE_ONNX_URL = "https://huggingface.co/DuarteBarbosa/deep-image-orientation-detection/resolve/main/orientation_model_v2_0.9882.onnx"
+
 def load_orientation_models():
     """
-    Loads Haar Cascade face detector and MobileNet-V2 ONNX model.
+    Loads DuarteBarbosa EfficientNetV2 ONNX orientation classifier model (98.13% ground truth accuracy).
+    Auto-downloads weights on first use if missing.
     """
-    cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-    face_cascade = cv2.CascadeClassifier(cascade_path)
-    
+    if not os.path.exists(ONNX_MODEL_PATH):
+        print(f"Downloading EfficientNetV2 orientation model weights to '{ONNX_MODEL_PATH}'...", flush=True)
+        try:
+            import urllib.request
+            urllib.request.urlretrieve(DUARTE_ONNX_URL, ONNX_MODEL_PATH)
+            print("Download complete.", flush=True)
+        except Exception as e:
+            print(f"Warning: Failed to download orientation model weights: {e}")
+            return None
+
     net = None
     if os.path.exists(ONNX_MODEL_PATH):
         try:
@@ -488,7 +499,7 @@ def load_orientation_models():
         except Exception as e:
             print(f"Warning: Failed to load ONNX model '{ONNX_MODEL_PATH}': {e}")
             
-    return face_cascade, net
+    return net
 
 
 def rotate_cv2_image(img, angle_cw):
@@ -505,72 +516,47 @@ def rotate_cv2_image(img, angle_cw):
     return img
 
 
-def classify_image_orientation(img, face_cascade=None, net=None):
+def classify_image_orientation(img, net=None):
     """
-    Classifies image orientation (0, 90, 180, 270 CW) using a hybrid Face + MobileNet-V2 approach.
+    Classifies image orientation (0, 90, 180, 270 CW) using EfficientNetV2 98.13% accurate model.
     """
-    if face_cascade is None or net is None:
-        fc, n = load_orientation_models()
-        face_cascade = face_cascade or fc
-        net = net or n
+    if net is None:
+        net = load_orientation_models()
         
-    h, w = img.shape[:2]
-    min_s = max(35, min(h, w) // 10)
-    
-    face_counts = {}
-    mobilenet_scores = {}
-    rotations = [0, 90, 180, 270]
+    if net is None:
+        return 0, "default", 1.0
+        
+    class_to_angle = {0: 0, 1: 90, 2: 180, 3: 270}
+    std = np.array([0.229, 0.224, 0.225], dtype=np.float32).reshape(1, 3, 1, 1)
     
     with MODEL_LOCK:
-        for rot in rotations:
-            rimg = rotate_cv2_image(img, rot)
-            
-            # 1. Face Detection
-            if face_cascade is not None and not face_cascade.empty():
-                gray = cv2.cvtColor(rimg, cv2.COLOR_BGR2GRAY)
-                faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=7, minSize=(min_s, min_s))
-                face_counts[rot] = len(faces)
-            else:
-                face_counts[rot] = 0
-                
-            # 2. MobileNet-V2 ImageNet Max-Confidence Classifier
-            if net is not None:
-                blob = cv2.dnn.blobFromImage(rimg, scalefactor=1.0/255.0, size=(224, 224),
-                                             mean=(0.485*255, 0.456*255, 0.406*255),
-                                             swapRB=True, crop=False)
-                net.setInput(blob)
-                out = net.forward()
-                exp_out = np.exp(out - np.max(out))
-                probs = exp_out / np.sum(exp_out)
-                mobilenet_scores[rot] = float(np.max(probs))
-            else:
-                mobilenet_scores[rot] = 0.0
+        blob = cv2.dnn.blobFromImage(img, scalefactor=1.0/255.0, size=(224, 224),
+                                     mean=(0.485*255, 0.456*255, 0.406*255),
+                                     swapRB=True, crop=False) / std
+        net.setInput(blob)
+        out = net.forward()[0]
+        
+    exp_out = np.exp(out - np.max(out))
+    probs = exp_out / np.sum(exp_out)
+    pred_cls = int(np.argmax(probs))
+    pred_angle = class_to_angle[pred_cls]
+    confidence = float(probs[pred_cls])
 
-    # Decision Stage 1: Face Detection
-    sorted_faces = sorted(face_counts.items(), key=lambda x: x[1], reverse=True)
-    if sorted_faces[0][1] > 0 and sorted_faces[0][1] > sorted_faces[1][1]:
-        return sorted_faces[0][0], "face_detection", sorted_faces[0][1]
-        
-    # Decision Stage 2: MobileNet-V2
-    if net is not None and mobilenet_scores:
-        best_mb = max(mobilenet_scores, key=mobilenet_scores.get)
-        return best_mb, "mobilenet_v2", mobilenet_scores[best_mb]
-        
-    return 0, "default", 1.0
+    return pred_angle, "efficientnet_v2", confidence
 
 
 def process_single_auto_rotate(item):
-    pid, crop_path, face_cascade, net = item
+    pid, crop_path, net = item
     if not os.path.exists(crop_path):
         return None
     img = cv2.imread(crop_path)
     if img is None:
         return None
-    angle, method, score = classify_image_orientation(img, face_cascade, net)
+    angle, method, score = classify_image_orientation(img, net)
     if angle != 0:
         rotated_img = rotate_cv2_image(img, angle)
         cv2.imwrite(crop_path, rotated_img, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
-        print(f"  [{pid}] Rotated {angle}° CW via {method}", flush=True)
+        print(f"  [{pid}] Rotated {angle}° CW via {method} (conf: {score:.2f})", flush=True)
     return (pid, angle, method)
 
 
@@ -585,7 +571,7 @@ def auto_rotate_all_crops(output_dir=OUTPUT_DIR, manifest_path=MANIFEST_FILE):
     with open(manifest_path) as f:
         manifest = json.load(f)
         
-    face_cascade, net = load_orientation_models()
+    net = load_orientation_models()
     
     print(f"Auto-rotating photo crops in '{output_dir}'...", flush=True)
     
@@ -594,7 +580,7 @@ def auto_rotate_all_crops(output_dir=OUTPUT_DIR, manifest_path=MANIFEST_FILE):
         for photo in scan_info["photos"]:
             pid = photo["id"]
             crop_path = os.path.join(output_dir, f"{pid}.jpg")
-            items.append((pid, crop_path, face_cascade, net))
+            items.append((pid, crop_path, net))
             
     total_rotated = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, os.cpu_count() or 4)) as executor:
@@ -617,6 +603,39 @@ def auto_rotate_all_crops(output_dir=OUTPUT_DIR, manifest_path=MANIFEST_FILE):
         
     print(f"Auto-rotation complete: {total_rotated} photos rotated.", flush=True)
     return total_rotated
+
+
+def batch_rotate_photos(rotations_map, output_dir=OUTPUT_DIR, manifest_path=MANIFEST_FILE):
+    """
+    Batch-rotates multiple cropped photos by specified angle deltas (+90, -90, 180).
+    """
+    if not os.path.exists(manifest_path):
+        return 0, "Manifest file not found"
+        
+    with open(manifest_path) as f:
+        manifest = json.load(f)
+        
+    total_rotated = 0
+    for scan_name, scan_info in manifest["scans"].items():
+        for photo in scan_info["photos"]:
+            pid = photo["id"]
+            if pid in rotations_map:
+                angle_delta = int(rotations_map[pid]) % 360
+                if angle_delta != 0:
+                    crop_path = os.path.join(output_dir, f"{pid}.jpg")
+                    if os.path.exists(crop_path):
+                        img = cv2.imread(crop_path)
+                        if img is not None:
+                            rotated_img = rotate_cv2_image(img, angle_delta)
+                            cv2.imwrite(crop_path, rotated_img, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+                            photo["rotation"] = (photo.get("rotation", 0) + angle_delta) % 360
+                            photo["rotation_method"] = "manual"
+                            total_rotated += 1
+                            
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2)
+        
+    return total_rotated, f"Successfully saved rotations for {total_rotated} photos"
 
 
 def rotate_single_photo(photo_id, angle_delta=90, output_dir=OUTPUT_DIR, manifest_path=MANIFEST_FILE):
@@ -813,6 +832,22 @@ class CropRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_header("Content-Type", "application/json")
                     self.end_headers()
                     self.wfile.write(json.dumps({"status": "error", "message": msg}).encode("utf-8"))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode("utf-8"))
+            return
+
+        elif path == "/api/batch_rotate_photos":
+            try:
+                data = json.loads(post_body.decode("utf-8")) if post_body else {}
+                rotations = data.get("rotations", {})
+                count, msg = batch_rotate_photos(rotations, OUTPUT_DIR, MANIFEST_FILE)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success", "count": count, "message": msg}).encode("utf-8"))
             except Exception as e:
                 self.send_response(500)
                 self.send_header("Content-Type", "application/json")

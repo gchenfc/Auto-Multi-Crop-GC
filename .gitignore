@@ -21,6 +21,9 @@ ENV/
 *.swp
 *.swo
 
+# Model weights
+*.onnx
+
 # Scanned photo directories
 ScanOldPhotos/
 ScanOldPhotosCropped/
