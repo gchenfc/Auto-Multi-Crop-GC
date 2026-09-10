@@ -521,30 +521,30 @@ def classify_image_orientation(img, face_cascade=None, net=None):
     mobilenet_scores = {}
     rotations = [0, 90, 180, 270]
     
-    for rot in rotations:
-        rimg = rotate_cv2_image(img, rot)
-        
-        # 1. Face Detection
-        if face_cascade is not None and not face_cascade.empty():
-            gray = cv2.cvtColor(rimg, cv2.COLOR_BGR2GRAY)
-            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=7, minSize=(min_s, min_s))
-            face_counts[rot] = len(faces)
-        else:
-            face_counts[rot] = 0
+    with MODEL_LOCK:
+        for rot in rotations:
+            rimg = rotate_cv2_image(img, rot)
             
-        # 2. MobileNet-V2 ImageNet Max-Confidence Classifier
-        if net is not None:
-            blob = cv2.dnn.blobFromImage(rimg, scalefactor=1.0/255.0, size=(224, 224),
-                                         mean=(0.485*255, 0.456*255, 0.406*255),
-                                         swapRB=True, crop=False)
-            with MODEL_LOCK:
+            # 1. Face Detection
+            if face_cascade is not None and not face_cascade.empty():
+                gray = cv2.cvtColor(rimg, cv2.COLOR_BGR2GRAY)
+                faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=7, minSize=(min_s, min_s))
+                face_counts[rot] = len(faces)
+            else:
+                face_counts[rot] = 0
+                
+            # 2. MobileNet-V2 ImageNet Max-Confidence Classifier
+            if net is not None:
+                blob = cv2.dnn.blobFromImage(rimg, scalefactor=1.0/255.0, size=(224, 224),
+                                             mean=(0.485*255, 0.456*255, 0.406*255),
+                                             swapRB=True, crop=False)
                 net.setInput(blob)
                 out = net.forward()
-            exp_out = np.exp(out - np.max(out))
-            probs = exp_out / np.sum(exp_out)
-            mobilenet_scores[rot] = float(np.max(probs))
-        else:
-            mobilenet_scores[rot] = 0.0
+                exp_out = np.exp(out - np.max(out))
+                probs = exp_out / np.sum(exp_out)
+                mobilenet_scores[rot] = float(np.max(probs))
+            else:
+                mobilenet_scores[rot] = 0.0
 
     # Decision Stage 1: Face Detection
     sorted_faces = sorted(face_counts.items(), key=lambda x: x[1], reverse=True)
@@ -571,8 +571,7 @@ def process_single_auto_rotate(item):
         rotated_img = rotate_cv2_image(img, angle)
         cv2.imwrite(crop_path, rotated_img, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
         print(f"  [{pid}] Rotated {angle}° CW via {method}", flush=True)
-        return (pid, angle, method)
-    return None
+    return (pid, angle, method)
 
 
 def auto_rotate_all_crops(output_dir=OUTPUT_DIR, manifest_path=MANIFEST_FILE):
@@ -608,14 +607,15 @@ def auto_rotate_all_crops(output_dir=OUTPUT_DIR, manifest_path=MANIFEST_FILE):
             pid = photo["id"]
             if pid in rotated_map:
                 angle, method = rotated_map[pid]
-                photo["rotation"] = (photo.get("rotation", 0) + angle) % 360
+                if angle != 0:
+                    photo["rotation"] = (photo.get("rotation", 0) + angle) % 360
+                    total_rotated += 1
                 photo["rotation_method"] = method
-                total_rotated += 1
                 
     with open(manifest_path, "w") as f:
         json.dump(manifest, f, indent=2)
         
-    print(f"Auto-rotation complete: {total_rotated} photos updated.", flush=True)
+    print(f"Auto-rotation complete: {total_rotated} photos rotated.", flush=True)
     return total_rotated
 
 

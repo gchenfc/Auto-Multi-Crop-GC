@@ -20,3 +20,9 @@ ENV/
 .idea/
 *.swp
 *.swo
+
+# Scanned photo directories
+ScanOldPhotos/
+ScanOldPhotosCropped/
+ScanOldPhotosDebug/
+

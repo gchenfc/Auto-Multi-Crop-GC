@@ -1000,7 +1000,13 @@
         card.className = 'gallery-card';
 
         const rotDeg = photo.rotation || 0;
-        const rotBadgeText = rotDeg > 0 ? `${rotDeg}° CW` : '0° Upright';
+        const method = photo.rotation_method || '';
+        let methodIcon = '✅';
+        if (method === 'face_detection') methodIcon = '🤖 Face';
+        else if (method === 'mobilenet_v2') methodIcon = '🧠 MobileNet';
+        else if (method === 'manual') methodIcon = '✋ Manual';
+
+        const rotBadgeText = rotDeg > 0 ? `${methodIcon} (${rotDeg}°)` : `${methodIcon} Upright`;
 
         card.innerHTML = `
           <div class="gallery-img-wrapper">
