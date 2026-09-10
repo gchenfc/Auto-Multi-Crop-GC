@@ -9,6 +9,7 @@ interactive web UI for previewing and editing crop polygons.
 import os
 import sys
 import json
+import traceback
 import glob
 import math
 import argparse
@@ -17,6 +18,9 @@ import socketserver
 import urllib.parse
 import cv2
 import numpy as np
+import threading
+
+MODEL_LOCK = threading.Lock()
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -533,8 +537,9 @@ def classify_image_orientation(img, face_cascade=None, net=None):
             blob = cv2.dnn.blobFromImage(rimg, scalefactor=1.0/255.0, size=(224, 224),
                                          mean=(0.485*255, 0.456*255, 0.406*255),
                                          swapRB=True, crop=False)
-            net.setInput(blob)
-            out = net.forward()
+            with MODEL_LOCK:
+                net.setInput(blob)
+                out = net.forward()
             exp_out = np.exp(out - np.max(out))
             probs = exp_out / np.sum(exp_out)
             mobilenet_scores[rot] = float(np.max(probs))
@@ -785,6 +790,7 @@ class CropRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "success", "rotated_count": count, "message": f"Auto-rotated {count} photos"}).encode("utf-8"))
             except Exception as e:
+                traceback.print_exc()
                 self.send_response(500)
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
