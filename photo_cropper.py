@@ -655,7 +655,7 @@ class CropRequestHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed_path.path
         query = urllib.parse.parse_qs(parsed_path.query)
         
-        if path in ["/", "/index.html", "/preview"]:
+        if path in ["/", "/index.html", "/preview", "/gallery"]:
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()

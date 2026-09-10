@@ -23,10 +23,88 @@
 
     body {
       display: flex;
+      flex-direction: column;
       height: 100vh;
       background-color: var(--bg-dark);
       color: var(--text-main);
       overflow: hidden;
+    }
+
+    /* Top App Header & Navigation Tabs */
+    #top-header {
+      height: 52px;
+      background-color: #0b1120;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      user-select: none;
+      z-index: 1000;
+    }
+
+    .app-brand h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+    }
+
+    .app-tabs {
+      display: flex;
+      gap: 6px;
+      background-color: rgba(30, 41, 59, 0.6);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      background-color: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background-color: var(--accent);
+      color: #0f172a;
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-badge {
+      background-color: rgba(15, 23, 42, 0.6);
+      color: inherit;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    /* App Body Wrapper */
+    #app-body {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* View 1: Crop Quad Editor */
+    #editor-view {
+      display: flex;
+      width: 100%;
+      height: 100%;
     }
 
     /* Sidebar Styles */
@@ -45,10 +123,10 @@
     }
 
     .sidebar-header h1 {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
       color: var(--accent);
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .sidebar-header p {
@@ -220,22 +298,6 @@
       left: 0;
     }
 
-    /* Status Toast */
-    #toast {
-      position: absolute;
-      bottom: 24px;
-      right: 24px;
-      padding: 12px 20px;
-      border-radius: 8px;
-      background-color: #1e293b;
-      color: #fff;
-      border: 1px solid var(--accent);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      font-size: 13px;
-      display: none;
-      z-index: 1000;
-    }
-
     /* Info Card */
     .info-card {
       position: absolute;
@@ -268,75 +330,262 @@
       color: var(--text-main);
       font-weight: 600;
     }
+
+    /* View 2: Cropped Photo Gallery */
+    #gallery-view {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-dark);
+    }
+
+    .gallery-toolbar {
+      padding: 14px 24px;
+      background-color: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .gallery-search {
+      padding: 9px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: #0f172a;
+      color: var(--text-main);
+      font-size: 13px;
+      width: 320px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .gallery-search:focus {
+      border-color: var(--accent);
+    }
+
+    .gallery-grid-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .gallery-card {
+      background-color: var(--bg-sidebar);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .gallery-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .gallery-img-wrapper {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background-color: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .gallery-img-wrapper img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .mini-rot-btn {
+      position: absolute;
+      top: 10px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      z-index: 10;
+    }
+
+    .mini-rot-btn.rot-ccw { left: 10px; }
+    .mini-rot-btn.rot-cw { right: 10px; }
+
+    .mini-rot-btn:hover {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+      transform: scale(1.15);
+    }
+
+    .gallery-card-footer {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      background-color: rgba(30, 41, 59, 0.5);
+    }
+
+    .gallery-photo-id {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+
+    .rot-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background-color: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+    }
+
+    /* Status Toast */
+    #toast {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background-color: #1e293b;
+      color: #fff;
+      border: 1px solid var(--accent);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      font-size: 13px;
+      display: none;
+      z-index: 2000;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <div id="sidebar">
-    <div class="sidebar-header">
+  <!-- Top App Header -->
+  <div id="top-header">
+    <div class="app-brand">
       <h1>Auto Multi-Crop GC</h1>
-      <p>Sub-Pixel Photo Scan Segmenter</p>
     </div>
-
-    <div class="filter-bar">
-      <button class="filter-btn active" onclick="setFilter('all')">All Scans</button>
-      <button class="filter-btn" onclick="setFilter('flagged')">Flagged</button>
-    </div>
-
-    <div class="scan-list" id="scan-list">
-      <!-- Dynamic Scan List -->
-    </div>
-
-    <div class="sidebar-footer">
-      <button class="btn btn-secondary" onclick="undo()" id="undo-btn" title="Keyboard shortcut: Ctrl+Z">
-        ↩️ Undo
+    <div class="app-tabs">
+      <button class="tab-btn active" id="tab-editor" onclick="switchTab('editor')">
+        📐 1. Crop Quad Editor
       </button>
-      <button class="btn btn-secondary" onclick="saveJsonOnly()">
-        💾 Save JSON Only
-      </button>
-      <button class="btn btn-secondary" onclick="exportDebugOverlays()">
-        🖼️ Export Debug Overlays
-      </button>
-      <button class="btn btn-secondary" onclick="autoRotateAll()">
-        🤖 Auto-Rotate All
-      </button>
-      <button class="btn btn-primary" onclick="saveAndRecrop()">
-        ✂️ Save & Re-Crop All Photos
+      <button class="tab-btn" id="tab-gallery" onclick="switchTab('gallery')">
+        🖼️ 2. Cropped Photo Gallery <span class="tab-badge" id="gallery-count-badge">0</span>
       </button>
     </div>
   </div>
 
-  <!-- Main View -->
-  <div id="main-content">
-    <div class="toolbar">
-      <div class="toolbar-title" id="current-scan-title">Select a scan</div>
-      <div class="toolbar-actions">
-        <button class="btn btn-secondary" onclick="undo()" title="Undo (Ctrl+Z)">↩️ Undo</button>
-        <button class="btn btn-secondary" onclick="addPhotoCrop()">➕ Add Crop</button>
-        <button class="btn btn-danger" onclick="deleteSelectedCrop()">🗑️ Delete</button>
-        <button class="btn btn-secondary" onclick="zoomIn()">🔍+</button>
-        <button class="btn btn-secondary" onclick="zoomOut()">🔍-</button>
-        <button class="btn btn-secondary" onclick="resetZoom()">Fit</button>
+  <div id="app-body">
+    <!-- View 1: Crop Quad Editor -->
+    <div id="editor-view">
+      <!-- Sidebar -->
+      <div id="sidebar">
+        <div class="sidebar-header">
+          <h1>Scan Sheets</h1>
+          <p>Select scan & inspect quad boundaries</p>
+        </div>
+
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="setFilter('all')">All Scans</button>
+          <button class="filter-btn" onclick="setFilter('flagged')">Flagged</button>
+        </div>
+
+        <div class="scan-list" id="scan-list">
+          <!-- Dynamic Scan List -->
+        </div>
+
+        <div class="sidebar-footer">
+          <button class="btn btn-secondary" onclick="undo()" id="undo-btn" title="Keyboard shortcut: Ctrl+Z">
+            ↩️ Undo Edit
+          </button>
+          <button class="btn btn-secondary" onclick="saveJsonOnly()">
+            💾 Save JSON Only
+          </button>
+          <button class="btn btn-secondary" onclick="exportDebugOverlays()">
+            🖼️ Export Debug Overlays
+          </button>
+          <button class="btn btn-primary" onclick="saveAndRecrop()">
+            ✂️ Save & Re-Crop All Photos
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Canvas Content -->
+      <div id="main-content">
+        <div class="toolbar">
+          <div class="toolbar-title" id="current-scan-title">Select a scan</div>
+          <div class="toolbar-actions">
+            <button class="btn btn-secondary" onclick="undo()" title="Undo (Ctrl+Z)">↩️ Undo</button>
+            <button class="btn btn-secondary" onclick="addPhotoCrop()">➕ Add Crop</button>
+            <button class="btn btn-danger" onclick="deleteSelectedCrop()">🗑️ Delete</button>
+            <button class="btn btn-secondary" onclick="zoomIn()">🔍+</button>
+            <button class="btn btn-secondary" onclick="zoomOut()">🔍-</button>
+            <button class="btn btn-secondary" onclick="resetZoom()">Fit</button>
+          </div>
+        </div>
+
+        <div class="canvas-container" id="canvas-container">
+          <canvas id="cropCanvas"></canvas>
+
+          <!-- Selection Info Card -->
+          <div class="info-card" id="info-card" style="display: none;">
+            <h3 id="info-photo-id">Photo Details</h3>
+            <img id="info-crop-thumb" style="width: 100%; height: 120px; object-fit: contain; border-radius: 6px; margin: 8px 0; background: #000; border: 1px solid var(--border-color);" alt="Crop Preview">
+            <div class="info-row"><span>Status:</span> <span class="val" id="info-status">OK</span></div>
+            <div class="info-row"><span>Size:</span> <span class="val" id="info-size">0 x 0 px</span></div>
+            <div class="info-row"><span>Aspect Ratio:</span> <span class="val" id="info-aspect">1.0</span></div>
+            <div class="info-row" id="info-flag-row" style="display: none; color: var(--warning);">
+              <span>Flag Reason:</span> <span class="val" id="info-flag-reason">-</span>
+            </div>
+            <div style="display: flex; gap: 6px; margin-top: 10px;">
+              <button class="btn btn-secondary" style="flex: 1; font-size: 11px; padding: 6px;" onclick="rotateSelectedPhoto(90)">🔄 90° CW</button>
+              <button class="btn btn-secondary" style="flex: 1; font-size: 11px; padding: 6px;" onclick="rotateSelectedPhoto(-90)">↺ 90° CCW</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="canvas-container" id="canvas-container">
-      <canvas id="cropCanvas"></canvas>
-
-      <!-- Selection Info Card -->
-      <div class="info-card" id="info-card" style="display: none;">
-        <h3 id="info-photo-id">Photo Details</h3>
-        <img id="info-crop-thumb" style="width: 100%; height: 120px; object-fit: contain; border-radius: 6px; margin: 8px 0; background: #000; border: 1px solid var(--border-color);" alt="Crop Preview">
-        <div class="info-row"><span>Status:</span> <span class="val" id="info-status">OK</span></div>
-        <div class="info-row"><span>Size:</span> <span class="val" id="info-size">0 x 0 px</span></div>
-        <div class="info-row"><span>Aspect Ratio:</span> <span class="val" id="info-aspect">1.0</span></div>
-        <div class="info-row" id="info-flag-row" style="display: none; color: var(--warning);">
-          <span>Flag Reason:</span> <span class="val" id="info-flag-reason">-</span>
+    <!-- View 2: Cropped Photo Gallery & Orientation Editor -->
+    <div id="gallery-view">
+      <div class="gallery-toolbar">
+        <input type="text" class="gallery-search" id="gallery-search" placeholder="Search photo ID or scan..." oninput="renderGallery()">
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <span style="font-size: 13px; color: var(--text-muted);" id="gallery-status-label">0 Cropped Photos</span>
+          <button class="btn btn-primary" onclick="autoRotateAll()">🤖 Auto-Rotate All Photos</button>
         </div>
-        <div style="display: flex; gap: 6px; margin-top: 10px;">
-          <button class="btn btn-secondary" style="flex: 1; font-size: 11px; padding: 6px;" onclick="rotateSelectedPhoto(90)">🔄 90° CW</button>
-          <button class="btn btn-secondary" style="flex: 1; font-size: 11px; padding: 6px;" onclick="rotateSelectedPhoto(-90)">↺ 90° CCW</button>
+      </div>
+
+      <div class="gallery-grid-container">
+        <div class="gallery-grid" id="gallery-grid">
+          <!-- Dynamic Gallery Cards -->
         </div>
       </div>
     </div>
@@ -350,6 +599,7 @@
     let currentScanName = null;
     let scanImage = new Image();
     let imageLoaded = false;
+    let activeTab = 'editor';
 
     // Undo History Stack
     let historyStack = [];
@@ -370,6 +620,21 @@
     const ctx = canvas.getContext('2d');
     const container = document.getElementById('canvas-container');
 
+    function switchTab(tab) {
+      activeTab = tab;
+      document.getElementById('tab-editor').classList.toggle('active', tab === 'editor');
+      document.getElementById('tab-gallery').classList.toggle('active', tab === 'gallery');
+      document.getElementById('editor-view').style.display = tab === 'editor' ? 'flex' : 'none';
+      document.getElementById('gallery-view').style.display = tab === 'gallery' ? 'flex' : 'none';
+
+      if (tab === 'gallery') {
+        renderGallery();
+      } else {
+        resizeCanvas();
+        draw();
+      }
+    }
+
     function saveStateToHistory() {
       if (historyStack.length > 25) historyStack.shift();
       historyStack.push(JSON.stringify(manifestData));
@@ -384,6 +649,7 @@
       manifestData = JSON.parse(prevState);
       renderScanList();
       draw();
+      if (activeTab === 'gallery') renderGallery();
       showToast('↩️ Undid last edit');
     }
 
@@ -400,18 +666,33 @@
         manifestData = await res.json();
         renderScanList();
 
+        const allPhotos = getAllPhotos();
+        document.getElementById('gallery-count-badge').innerText = allPhotos.length;
+
         const scanNames = Object.keys(manifestData.scans);
-        if (scanNames.length > 0) {
+        if (scanNames.length > 0 && !currentScanName) {
           selectScan(scanNames[0]);
         }
+
+        if (activeTab === 'gallery') renderGallery();
       } catch (err) {
         showToast('Failed to load manifest: ' + err.message);
       }
     }
 
+    function getAllPhotos() {
+      const photos = [];
+      Object.keys(manifestData.scans).forEach(scanName => {
+        manifestData.scans[scanName].photos.forEach(photo => {
+          photos.push({ ...photo, scanName });
+        });
+      });
+      return photos;
+    }
+
     function setFilter(filter) {
       currentFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.filter-bar .filter-btn').forEach(btn => btn.classList.remove('active'));
       event.target.classList.add('active');
       renderScanList();
     }
@@ -461,6 +742,7 @@
     }
 
     function resizeCanvas() {
+      if (activeTab !== 'editor') return;
       canvas.width = container.clientWidth;
       canvas.height = container.clientHeight;
       draw();
@@ -468,7 +750,7 @@
     window.addEventListener('resize', resizeCanvas);
 
     function resetZoom() {
-      if (!imageLoaded) return;
+      if (!imageLoaded || activeTab !== 'editor') return;
       resizeCanvas();
       const containerW = container.clientWidth;
       const containerH = container.clientHeight;
@@ -490,6 +772,7 @@
     }
 
     function draw() {
+      if (activeTab !== 'editor') return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       if (!imageLoaded || !currentScanName) return;
 
@@ -575,6 +858,7 @@
     }
 
     container.addEventListener('mousedown', (e) => {
+      if (activeTab !== 'editor') return;
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
@@ -612,6 +896,7 @@
     });
 
     container.addEventListener('mousemove', (e) => {
+      if (activeTab !== 'editor') return;
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
@@ -637,6 +922,7 @@
     });
 
     container.addEventListener('wheel', (e) => {
+      if (activeTab !== 'editor') return;
       e.preventDefault();
       const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
       scale *= zoomFactor;
@@ -695,6 +981,63 @@
       showToast('🗑️ Deleted crop polygon');
     }
 
+    function renderGallery() {
+      const grid = document.getElementById('gallery-grid');
+      if (!grid) return;
+
+      const query = (document.getElementById('gallery-search')?.value || '').toLowerCase();
+      const photos = getAllPhotos();
+
+      document.getElementById('gallery-count-badge').innerText = photos.length;
+
+      const filtered = photos.filter(p => p.id.toLowerCase().includes(query) || p.scanName.toLowerCase().includes(query));
+      document.getElementById('gallery-status-label').innerText = `Showing ${filtered.length} of ${photos.length} Cropped Photos`;
+
+      grid.innerHTML = '';
+
+      filtered.forEach(photo => {
+        const card = document.createElement('div');
+        card.className = 'gallery-card';
+
+        const rotDeg = photo.rotation || 0;
+        const rotBadgeText = rotDeg > 0 ? `${rotDeg}° CW` : '0° Upright';
+
+        card.innerHTML = `
+          <div class="gallery-img-wrapper">
+            <button class="mini-rot-btn rot-ccw" onclick="event.stopPropagation(); rotateGalleryPhoto('${photo.id}', -90)" title="Rotate 90° CCW">↺</button>
+            <button class="mini-rot-btn rot-cw" onclick="event.stopPropagation(); rotateGalleryPhoto('${photo.id}', 90)" title="Rotate 90° CW">🔄</button>
+            <img id="thumb-${photo.id}" src="/api/cropped_image?id=${encodeURIComponent(photo.id)}&t=${Date.now()}" alt="${photo.id}">
+          </div>
+          <div class="gallery-card-footer">
+            <div class="gallery-photo-id" title="${photo.id}">${photo.id}</div>
+            <span class="rot-badge">${rotBadgeText}</span>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    async function rotateGalleryPhoto(photoId, deg) {
+      showToast(`🔄 Rotating ${photoId} by ${deg}°...`);
+      try {
+        const res = await fetch('/api/rotate_photo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photo_id: photoId, angle: deg })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          showToast(`✅ Rotated ${photoId}`);
+          await loadManifest();
+          renderGallery();
+        } else {
+          showToast('❌ Rotation error: ' + data.message);
+        }
+      } catch (err) {
+        showToast('❌ Rotation failed: ' + err.message);
+      }
+    }
+
     async function saveJsonOnly() {
       showToast('💾 Saving JSON manifest...');
       try {
@@ -744,6 +1087,7 @@
         const data = await res.json();
         if (data.status === 'success') {
           showToast('✅ All photos successfully cropped!');
+          if (activeTab === 'gallery') renderGallery();
         } else {
           showToast('❌ Error: ' + data.message);
         }
@@ -763,7 +1107,11 @@
         if (data.status === 'success') {
           showToast(`✅ ${data.message}`);
           await loadManifest();
-          updateInfoCard();
+          if (activeTab === 'gallery') {
+            renderGallery();
+          } else {
+            updateInfoCard();
+          }
         } else {
           showToast('❌ Auto-rotate error: ' + data.message);
         }

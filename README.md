@@ -13,15 +13,9 @@ Auto Multi-Crop GC is a Python application for auto-segmenting and cropping indi
   - **Stage 1 (Face Detection)**: Uses OpenCV Haar Cascades across candidate 90° rotations to orient photos containing people.
   - **Stage 2 (MobileNet-V2 CNN)**: Uses an ONNX MobileNet-V2 model to classify ImageNet visual feature orientation for landscape, building, object, and non-face photos.
 - **Quality Control & Flagging Engine**: Automatically detects non-orthogonal corners or extreme skewing and flags problematic crops for review.
-- **Interactive Web Editor & Inspector**:
-  - **Pan & Zoom Canvas**: Inspect hires scan beds with sub-pixel canvas positioning.
-  - **Corner Handle Editing**: Interactively tweak quadrilateral corners in real time.
-  - **Add & Delete Crops**: Manually insert missing photos or delete unwanted region boxes.
-  - **Single-Photo & Batch Rotation**: Click **🤖 Auto-Rotate All** or use **🔄 90° CW** / **↺ 90° CCW** buttons on individual photo info cards.
-  - **Undo (`Ctrl+Z` / `Cmd+Z`)**: Complete state history tracking for corner edits, additions, and deletions.
-  - **Save JSON Only**: Quickly update `crops_manifest.json` without triggering heavy image re-cropping.
-  - **Export Debug Overlays**: Render visual debug images with edge gradient sampling points and polygon outlines into `ScanOldPhotosDebug/`.
-  - **Save & Re-Crop All**: Re-render all cropped photos in parallel using updated manifest coordinates.
+- **Interactive Dual-Tab Web Application**:
+  - **Tab 1 (📐 1. Crop Quad Editor)**: Pan/zoom canvas to inspect full scan beds, drag corner handles, add/delete crops, save JSON, export debug overlays, and re-crop photos.
+  - **Tab 2 (🖼️ 2. Cropped Photo Gallery)**: Dedicated orientation & rotation workspace displaying a responsive thumbnail grid of all cropped photos with overlay **↺ 90° CCW** (top-left) and **🔄 90° CW** (top-right) buttons on every card for instantaneous manual rotation, plus a **🤖 Auto-Rotate All** batch button.
 
 ---
 
