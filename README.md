@@ -1,87 +1,86 @@
-# Auto Cropper GC 🖼️✂️
+# Auto Cropper GC: Sub-pixel Edge Fitting & Web UI
 
-An automatic, batch-able photo scan segmenter, sub-pixel RANSAC crop detector, and perspective corrector with an interactive HTML5 preview editor.
-
-Designed to automatically process high-resolution flatbed photo scans containing 1–4 physical prints, detect precise straight edges with sub-pixel RANSAC line fitting, correct sub-90° tilt/rotations, and export individual perspective-corrected JPEGs.
+Auto Cropper GC is a Python application for auto-segmenting and cropping individual photos from multi-photo scan sheets. It features RANSAC sub-pixel edge detection, perspective correction, quality-control flagging, and an interactive HTML5 Web UI for visual inspection and manual fine-tuning.
 
 ---
 
-## 🌟 Key Features
+## ✨ Features
 
-1. **Automatic Batch Segmentation**:
-   - Automatically segments individual photographs from high-resolution scanner scans.
-   - Handles tight photo spacing, thin white margins, and light background reflections.
-
-2. **Sub-Pixel RANSAC Line Fitting**:
-   - Uses directional Sobel gradient peak searching paired with **RANSAC outlier rejection** (`fit_line_ransac()`) to fit sub-pixel accurate straight lines along outer paper borders.
-   - Completely ignores internal photo texture noise, clothing lines, and neighboring photo borders.
-
-3. **Sub-90° Rotation & Perspective Warp**:
-   - Calculates 4-point perspective warp matrices (`cv2.getPerspectiveTransform`) to straighten tilted or crooked scanned prints.
-
-4. **Scanner Bed Artifact Exclusion**:
-   - Ignores outer perimeter glass/frame dark shadow artifacts (`SCANNER_BORDER_MARGIN = 15px`).
-
-5. **Interactive HTML5 Web Editor (`preview.html`)**:
-   - Built-in lightweight web server (`photo_cropper.py --server`).
-   - Interactive canvas displaying overlayed 4-corner crop quadrilaterals.
-   - **Draggable Corner Handles**: Drag any corner point to fine-tune crop boundaries.
-   - **Undo Support (`Ctrl+Z`)**: Multi-level state history tracking for corner edits, additions, and deletions.
-   - **Save JSON Only**: Instantly save crop manifest coordinates without full image re-cropping.
-   - **Export Debug Overlays**: Export visual debug overlay images showing edge sampling points.
+- **Automatic Multi-Photo Detection**: Automatically detects multiple photos per scanned sheet using morphological segmentation and contour analysis.
+- **RANSAC Sub-Pixel Edge Refinement**: Uses Sobel gradient magnitude rays and RANSAC outlier-resistant 2D line fitting to tightly snap crop boundaries to real photo edges while ignoring scanbed background artifacts.
+- **Perspective Transform & Edge Preservation**: Flattens non-rectangular or angled scans via 4-point homography warping, with configurable margin expansion (`--margin`) to preserve 100% of photo edges.
+- **Quality Control & Flagging Engine**: Automatically detects non-orthogonal corners or extreme skewing and flags problematic crops for review.
+- **Interactive Web Editor & Inspector**:
+  - **Pan & Zoom Canvas**: Inspect hires scan beds with sub-pixel canvas positioning.
+  - **Corner Handle Editing**: Interactively tweak quadrilateral corners in real time.
+  - **Add & Delete Crops**: Manually insert missing photos or delete unwanted region boxes.
+  - **Undo (`Ctrl+Z` / `Cmd+Z`)**: Complete state history tracking for corner edits, additions, and deletions.
+  - **Save JSON Only**: Quickly update `crops_manifest.json` without triggering heavy image re-cropping.
+  - **Export Debug Overlays**: Render visual debug images with edge gradient sampling points and polygon outlines into `ScanOldPhotosDebug/`.
+  - **Save & Re-Crop All**: Re-render all cropped photos in parallel using updated manifest coordinates.
 
 ---
 
-## 📁 Directory Structure
+## 🛠️ Installation & Requirements
+
+Requires **Python 3.8+** and standard data science / computer vision libraries:
+
+```bash
+pip install opencv-python numpy
+```
+
+---
+
+## 📂 Project Structure
 
 ```text
 VA_scans/
-├── ScanOldPhotos/         # Source scan JPEGs
-├── ScanOldPhotosCropped/  # Exported individual cropped JPEGs
-├── ScanOldPhotosDebug/    # Visual debug overlay images
-├── crops_manifest.json    # JSON manifest containing 4-corner quad coordinates
-├── photo_cropper.py       # Core Python engine and Web API server
-├── preview.html           # HTML5 Canvas web editor
-└── README.md
+├── ScanOldPhotos/         # Input raw scan files (.jpg, .jpeg, .png)
+├── ScanOldPhotosCropped/  # Exported individual cropped photos
+├── ScanOldPhotosDebug/    # Generated visual debug overlays
+├── crops_manifest.json    # JSON manifest containing detected quad coordinates
+├── photo_cropper.py       # Core CLI script & web server backend
+└── preview.html           # Interactive HTML5 Web UI frontend
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 CLI Usage
 
-### Requirements
-- Python 3.8+
-- OpenCV (`opencv-python`)
-- NumPy
-- Pillow
-
-### Usage Commands
+Run the core script using python:
 
 ```bash
-# 1. Run full pipeline: Detect -> Crop -> Debug Overlays -> Launch Web Server
-python3 photo_cropper.py --all
+# Run the complete pipeline (Detect -> Crop -> Debug -> Web Server)
+python photo_cropper.py --all
 
-# 2. Run detection and generate crops_manifest.json
-python3 photo_cropper.py --detect
+# Run individual pipeline stages
+python photo_cropper.py --detect   # Detect photos & generate crops_manifest.json
+python photo_cropper.py --crop     # Export cropped photos to ScanOldPhotosCropped/
+python photo_cropper.py --debug    # Generate visual debug images in ScanOldPhotosDebug/
+python photo_cropper.py --server   # Launch Web UI on http://localhost:8000
 
-# 3. Export cropped photos from manifest (with optional margin padding)
-python3 photo_cropper.py --crop --margin 3
-
-# 4. Generate visual debug overlay images
-python3 photo_cropper.py --debug
-
-# 5. Start Preview Web Server only
-python3 photo_cropper.py --server
+# Custom Options
+python photo_cropper.py --server --port 8080   # Custom HTTP server port
+python photo_cropper.py --crop --margin 4        # Set crop edge expansion margin in pixels
 ```
 
 ---
 
-## 🌐 Web Preview Editor
+## 🌐 Web Editor Interface
 
-Access the web interface at **`http://localhost:8000`** while `--server` is running.
+Launch the server with `python photo_cropper.py --server` and navigate to `http://localhost:8000` in your browser.
 
-- **Pan & Zoom**: Click and drag background or use scroll wheel.
-- **Adjust Corners**: Drag blue handle points on any photo.
-- **Undo Edit**: Click "Undo" or press `Ctrl+Z`.
-- **Add / Delete Crop**: Add new photo crops or remove false positives.
-- **Save & Re-Crop**: Update JSON manifest and re-export cropped JPEGs.
+### Controls & Navigation
+- **Pan Viewport**: Click and drag on empty canvas area.
+- **Zoom**: Mouse wheel or `🔍+` / `🔍-` toolbar buttons.
+- **Corner Adjustment**: Click and drag any white corner handle on a selected photo quad.
+- **Undo Edit**: Press `Ctrl+Z` (or `Cmd+Z` on Mac) or click **↩️ Undo**.
+- **Save JSON Only**: Click **💾 Save JSON Only** to save corner modifications to `crops_manifest.json`.
+- **Export Debug Overlays**: Click **🖼️ Export Debug Overlays** to generate annotated debug images.
+- **Save & Re-Crop All**: Click **✂️ Save & Re-Crop All** to export high-quality cropped JPEG images.
+
+---
+
+## 📄 License
+
+MIT License. Free for personal and commercial use.
