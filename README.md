@@ -1,6 +1,6 @@
-# Auto Cropper GC: Sub-pixel Edge Fitting & Web UI
+# Auto Multi-Crop GC: Sub-pixel Edge Fitting & Web UI
 
-Auto Cropper GC is a Python application for auto-segmenting and cropping individual photos from multi-photo scan sheets. It features RANSAC sub-pixel edge detection, perspective correction, quality-control flagging, and an interactive HTML5 Web UI for visual inspection and manual fine-tuning.
+Auto Multi-Crop GC is a Python application for auto-segmenting and cropping individual photos from multi-photo scan sheets. It features RANSAC sub-pixel edge detection, perspective correction, quality-control flagging, and an interactive HTML5 Web UI for visual inspection and manual fine-tuning.
 
 ---
 
