@@ -298,6 +298,9 @@
       <button class="btn btn-secondary" onclick="exportDebugOverlays()">
         🖼️ Export Debug Overlays
       </button>
+      <button class="btn btn-secondary" onclick="autoRotateAll()">
+        🤖 Auto-Rotate All
+      </button>
       <button class="btn btn-primary" onclick="saveAndRecrop()">
         ✂️ Save & Re-Crop All Photos
       </button>
@@ -324,11 +327,16 @@
       <!-- Selection Info Card -->
       <div class="info-card" id="info-card" style="display: none;">
         <h3 id="info-photo-id">Photo Details</h3>
+        <img id="info-crop-thumb" style="width: 100%; height: 120px; object-fit: contain; border-radius: 6px; margin: 8px 0; background: #000; border: 1px solid var(--border-color);" alt="Crop Preview">
         <div class="info-row"><span>Status:</span> <span class="val" id="info-status">OK</span></div>
         <div class="info-row"><span>Size:</span> <span class="val" id="info-size">0 x 0 px</span></div>
         <div class="info-row"><span>Aspect Ratio:</span> <span class="val" id="info-aspect">1.0</span></div>
         <div class="info-row" id="info-flag-row" style="display: none; color: var(--warning);">
           <span>Flag Reason:</span> <span class="val" id="info-flag-reason">-</span>
+        </div>
+        <div style="display: flex; gap: 6px; margin-top: 10px;">
+          <button class="btn btn-secondary" style="flex: 1; font-size: 11px; padding: 6px;" onclick="rotateSelectedPhoto(90)">🔄 90° CW</button>
+          <button class="btn btn-secondary" style="flex: 1; font-size: 11px; padding: 6px;" onclick="rotateSelectedPhoto(-90)">↺ 90° CCW</button>
         </div>
       </div>
     </div>
@@ -546,6 +554,11 @@
       document.getElementById('info-status').innerText = photo.flagged ? 'FLAGGED' : 'VALID';
       document.getElementById('info-status').style.color = photo.flagged ? 'var(--warning)' : 'var(--success)';
 
+      const thumb = document.getElementById('info-crop-thumb');
+      if (thumb) {
+        thumb.src = `/api/cropped_image?id=${encodeURIComponent(photo.id)}&t=${Date.now()}`;
+      }
+
       const c = photo.corners;
       const w = Math.round(Math.hypot(c[1][0] - c[0][0], c[1][1] - c[0][1]));
       const h = Math.round(Math.hypot(c[3][0] - c[0][0], c[3][1] - c[0][1]));
@@ -736,6 +749,49 @@
         }
       } catch (err) {
         showToast('❌ Re-crop failed: ' + err.message);
+      }
+    }
+
+    async function autoRotateAll() {
+      showToast('🤖 Running auto-orientation classification & rotation...');
+      try {
+        const res = await fetch('/api/auto_rotate_all', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          showToast(`✅ ${data.message}`);
+          await loadManifest();
+          updateInfoCard();
+        } else {
+          showToast('❌ Auto-rotate error: ' + data.message);
+        }
+      } catch (err) {
+        showToast('❌ Auto-rotate failed: ' + err.message);
+      }
+    }
+
+    async function rotateSelectedPhoto(deg) {
+      if (selectedPhotoIdx < 0 || !currentScanName) return;
+      const photo = manifestData.scans[currentScanName].photos[selectedPhotoIdx];
+      showToast(`🔄 Rotating ${photo.id} by ${deg}°...`);
+      try {
+        const res = await fetch('/api/rotate_photo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photo_id: photo.id, angle: deg })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          showToast(`✅ ${data.message}`);
+          await loadManifest();
+          updateInfoCard();
+        } else {
+          showToast('❌ Rotation error: ' + data.message);
+        }
+      } catch (err) {
+        showToast('❌ Rotation failed: ' + err.message);
       }
     }
 

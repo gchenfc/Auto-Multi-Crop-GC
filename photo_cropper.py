@@ -26,6 +26,7 @@ OUTPUT_DIR = os.path.join(SCRIPT_DIR, "ScanOldPhotosCropped")
 DEBUG_DIR = os.path.join(SCRIPT_DIR, "ScanOldPhotosDebug")
 MANIFEST_FILE = os.path.join(SCRIPT_DIR, "crops_manifest.json")
 PREVIEW_HTML_FILE = os.path.join(SCRIPT_DIR, "preview.html")
+ONNX_MODEL_PATH = os.path.join(SCRIPT_DIR, "mobilenetv2-12.onnx")
 PORT = 8000
 DEFAULT_MARGIN = 2  # Expand crop quad by N pixels outward to preserve 100% of edges
 SCANNER_BORDER_MARGIN = 15  # Ignore outer N pixels of scan bed to eliminate scanner glass/frame artifacts
@@ -469,6 +470,182 @@ def generate_debug_images(input_dir=INPUT_DIR, debug_dir=DEBUG_DIR, manifest_pat
     print(f"Saved debug images for all scans in '{debug_dir}'.")
 
 
+def load_orientation_models():
+    """
+    Loads Haar Cascade face detector and MobileNet-V2 ONNX model.
+    """
+    cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+    face_cascade = cv2.CascadeClassifier(cascade_path)
+    
+    net = None
+    if os.path.exists(ONNX_MODEL_PATH):
+        try:
+            net = cv2.dnn.readNetFromONNX(ONNX_MODEL_PATH)
+        except Exception as e:
+            print(f"Warning: Failed to load ONNX model '{ONNX_MODEL_PATH}': {e}")
+            
+    return face_cascade, net
+
+
+def rotate_cv2_image(img, angle_cw):
+    """
+    Rotates image by angle_cw degrees (0, 90, 180, 270) clockwise.
+    """
+    angle_cw = int(angle_cw) % 360
+    if angle_cw == 90:
+        return cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+    elif angle_cw == 180:
+        return cv2.rotate(img, cv2.ROTATE_180)
+    elif angle_cw == 270:
+        return cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    return img
+
+
+def classify_image_orientation(img, face_cascade=None, net=None):
+    """
+    Classifies image orientation (0, 90, 180, 270 CW) using a hybrid Face + MobileNet-V2 approach.
+    """
+    if face_cascade is None or net is None:
+        fc, n = load_orientation_models()
+        face_cascade = face_cascade or fc
+        net = net or n
+        
+    h, w = img.shape[:2]
+    min_s = max(35, min(h, w) // 10)
+    
+    face_counts = {}
+    mobilenet_scores = {}
+    rotations = [0, 90, 180, 270]
+    
+    for rot in rotations:
+        rimg = rotate_cv2_image(img, rot)
+        
+        # 1. Face Detection
+        if face_cascade is not None and not face_cascade.empty():
+            gray = cv2.cvtColor(rimg, cv2.COLOR_BGR2GRAY)
+            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=7, minSize=(min_s, min_s))
+            face_counts[rot] = len(faces)
+        else:
+            face_counts[rot] = 0
+            
+        # 2. MobileNet-V2 ImageNet Max-Confidence Classifier
+        if net is not None:
+            blob = cv2.dnn.blobFromImage(rimg, scalefactor=1.0/255.0, size=(224, 224),
+                                         mean=(0.485*255, 0.456*255, 0.406*255),
+                                         swapRB=True, crop=False)
+            net.setInput(blob)
+            out = net.forward()
+            exp_out = np.exp(out - np.max(out))
+            probs = exp_out / np.sum(exp_out)
+            mobilenet_scores[rot] = float(np.max(probs))
+        else:
+            mobilenet_scores[rot] = 0.0
+
+    # Decision Stage 1: Face Detection
+    sorted_faces = sorted(face_counts.items(), key=lambda x: x[1], reverse=True)
+    if sorted_faces[0][1] > 0 and sorted_faces[0][1] > sorted_faces[1][1]:
+        return sorted_faces[0][0], "face_detection", sorted_faces[0][1]
+        
+    # Decision Stage 2: MobileNet-V2
+    if net is not None and mobilenet_scores:
+        best_mb = max(mobilenet_scores, key=mobilenet_scores.get)
+        return best_mb, "mobilenet_v2", mobilenet_scores[best_mb]
+        
+    return 0, "default", 1.0
+
+
+def process_single_auto_rotate(item):
+    pid, crop_path, face_cascade, net = item
+    if not os.path.exists(crop_path):
+        return None
+    img = cv2.imread(crop_path)
+    if img is None:
+        return None
+    angle, method, score = classify_image_orientation(img, face_cascade, net)
+    if angle != 0:
+        rotated_img = rotate_cv2_image(img, angle)
+        cv2.imwrite(crop_path, rotated_img, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+        print(f"  [{pid}] Rotated {angle}° CW via {method}", flush=True)
+        return (pid, angle, method)
+    return None
+
+
+def auto_rotate_all_crops(output_dir=OUTPUT_DIR, manifest_path=MANIFEST_FILE):
+    """
+    Auto-detects and corrects orientation for all exported crop images in parallel.
+    """
+    import concurrent.futures
+    if not os.path.exists(manifest_path):
+        return 0
+        
+    with open(manifest_path) as f:
+        manifest = json.load(f)
+        
+    face_cascade, net = load_orientation_models()
+    
+    print(f"Auto-rotating photo crops in '{output_dir}'...", flush=True)
+    
+    items = []
+    for scan_name, scan_info in manifest["scans"].items():
+        for photo in scan_info["photos"]:
+            pid = photo["id"]
+            crop_path = os.path.join(output_dir, f"{pid}.jpg")
+            items.append((pid, crop_path, face_cascade, net))
+            
+    total_rotated = 0
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(8, os.cpu_count() or 4)) as executor:
+        results = list(executor.map(process_single_auto_rotate, items))
+        
+    rotated_map = {r[0]: (r[1], r[2]) for r in results if r is not None}
+    
+    for scan_name, scan_info in manifest["scans"].items():
+        for photo in scan_info["photos"]:
+            pid = photo["id"]
+            if pid in rotated_map:
+                angle, method = rotated_map[pid]
+                photo["rotation"] = (photo.get("rotation", 0) + angle) % 360
+                photo["rotation_method"] = method
+                total_rotated += 1
+                
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2)
+        
+    print(f"Auto-rotation complete: {total_rotated} photos updated.", flush=True)
+    return total_rotated
+
+
+def rotate_single_photo(photo_id, angle_delta=90, output_dir=OUTPUT_DIR, manifest_path=MANIFEST_FILE):
+    """
+    Rotates a single photo by angle_delta degrees (+90 CW or -90 CCW).
+    """
+    crop_path = os.path.join(output_dir, f"{photo_id}.jpg")
+    if not os.path.exists(crop_path):
+        return False, f"Photo file {photo_id}.jpg not found"
+        
+    img = cv2.imread(crop_path)
+    if img is None:
+        return False, "Failed to read image"
+        
+    rotated_img = rotate_cv2_image(img, angle_delta)
+    cv2.imwrite(crop_path, rotated_img, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+    
+    if os.path.exists(manifest_path):
+        with open(manifest_path) as f:
+            manifest = json.load(f)
+            
+        for scan_name, scan_info in manifest["scans"].items():
+            for photo in scan_info["photos"]:
+                if photo["id"] == photo_id:
+                    photo["rotation"] = (photo.get("rotation", 0) + angle_delta) % 360
+                    photo["rotation_method"] = "manual"
+                    break
+                    
+        with open(manifest_path, "w") as f:
+            json.dump(manifest, f, indent=2)
+            
+    return True, f"Rotated {photo_id} by {angle_delta}°"
+
+
 class CropRequestHandler(http.server.SimpleHTTPRequestHandler):
     """
     HTTP Server Handler for Preview Web UI and REST API.
@@ -509,6 +686,21 @@ class CropRequestHandler(http.server.SimpleHTTPRequestHandler):
                 return
             else:
                 self.send_error(404, "Image not found")
+                return
+                
+        elif path == "/api/cropped_image":
+            photo_id = query.get("id", [""])[0]
+            crop_path = os.path.join(OUTPUT_DIR, f"{photo_id}.jpg")
+            if os.path.exists(crop_path):
+                self.send_response(200)
+                self.send_header("Content-Type", "image/jpeg")
+                self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+                self.end_headers()
+                with open(crop_path, "rb") as f:
+                    self.wfile.write(f.read())
+                return
+            else:
+                self.send_error(404, "Cropped photo not found")
                 return
                 
         elif path == "/api/export_debug":
@@ -584,6 +776,43 @@ class CropRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode("utf-8"))
             return
+            
+        elif path == "/api/auto_rotate_all":
+            try:
+                count = auto_rotate_all_crops(OUTPUT_DIR, MANIFEST_FILE)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success", "rotated_count": count, "message": f"Auto-rotated {count} photos"}).encode("utf-8"))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode("utf-8"))
+            return
+            
+        elif path == "/api/rotate_photo":
+            try:
+                data = json.loads(post_body.decode("utf-8")) if post_body else {}
+                photo_id = data.get("photo_id", "")
+                angle = int(data.get("angle", 90))
+                success, msg = rotate_single_photo(photo_id, angle, OUTPUT_DIR, MANIFEST_FILE)
+                if success:
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "success", "message": msg}).encode("utf-8"))
+                else:
+                    self.send_response(400)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "error", "message": msg}).encode("utf-8"))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode("utf-8"))
+            return
 
 
 def start_server(port=PORT):
@@ -613,10 +842,11 @@ def main():
     parser = argparse.ArgumentParser(description="Batch Photo Scan Segmenter & Cropper")
     parser.add_argument("--detect", action="store_true", help="Run detection and generate crops_manifest.json")
     parser.add_argument("--crop", action="store_true", help="Export cropped photos based on crops_manifest.json")
+    parser.add_argument("--auto-rotate", action="store_true", help="Auto-detect orientation and rotate cropped photos")
     parser.add_argument("--debug", action="store_true", help="Generate debug overlay images in ScanOldPhotosDebug/")
     parser.add_argument("--server", action="store_true", help="Start preview web server")
     parser.add_argument("--margin", type=int, default=DEFAULT_MARGIN, help="Expand crops by N pixels margin (default: 2)")
-    parser.add_argument("--all", action="store_true", help="Run full pipeline: detect -> crop -> server")
+    parser.add_argument("--all", action="store_true", help="Run full pipeline: detect -> crop -> auto-rotate -> server")
     parser.add_argument("--port", type=int, default=PORT, help="Port for web server (default: 8000)")
     
     args = parser.parse_args()
@@ -624,12 +854,15 @@ def main():
     if len(sys.argv) == 1 or args.all:
         build_manifest()
         run_crop_all(margin=args.margin)
+        auto_rotate_all_crops()
         generate_debug_images()
         start_server(args.port)
     elif args.detect:
         build_manifest()
     elif args.crop:
         run_crop_all(margin=args.margin)
+    elif args.auto_rotate:
+        auto_rotate_all_crops()
     elif args.debug:
         generate_debug_images()
     elif args.server:
