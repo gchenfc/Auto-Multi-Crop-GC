@@ -52,8 +52,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 90,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 180,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 1_photo_3",
@@ -77,8 +77,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 270,
-          "rotation_method": "face_detection"
+          "rotation": 180,
+          "rotation_method": "manual"
         }
       ]
     },
@@ -109,8 +109,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 270,
-          "rotation_method": "face_detection"
+          "rotation": 90,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 10_photo_2",
@@ -134,8 +134,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 90,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 0,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 10_photo_3",
@@ -269,8 +269,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 90,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 270,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 12_photo_2",
@@ -294,8 +294,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 90,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 0,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 12_photo_3",
@@ -319,7 +319,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 270
         }
       ]
     },
@@ -350,8 +351,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 270,
-          "rotation_method": "face_detection"
+          "rotation": 90,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 13_photo_2",
@@ -375,8 +376,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 180,
-          "rotation_method": "face_detection"
+          "rotation": 0,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 13_photo_3",
@@ -456,8 +457,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 180,
-          "rotation_method": "face_detection"
+          "rotation": 90,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 14_photo_3",
@@ -481,8 +482,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 270,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 180,
+          "rotation_method": "manual"
         }
       ]
     },
@@ -537,8 +538,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 180,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 270,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 15_photo_3",
@@ -562,8 +563,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 270,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 90,
+          "rotation_method": "manual"
         }
       ]
     },
@@ -642,7 +643,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         }
       ]
     },
@@ -697,7 +699,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         },
         {
           "id": "scan 17_photo_3",
@@ -721,8 +724,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 180,
-          "rotation_method": "face_detection"
+          "rotation": 90,
+          "rotation_method": "manual"
         }
       ]
     },
@@ -833,8 +836,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 180,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 270,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 19_photo_3",
@@ -858,7 +861,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         }
       ]
     },
@@ -889,8 +893,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 270,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 180,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 2_photo_2",
@@ -1019,7 +1023,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         }
       ]
     },
@@ -1050,7 +1055,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 180
         },
         {
           "id": "scan 21_photo_2",
@@ -1074,7 +1080,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 270
         },
         {
           "id": "scan 21_photo_3",
@@ -1098,7 +1105,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 180
         }
       ]
     },
@@ -1178,8 +1186,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 90,
-          "rotation_method": "face_detection"
+          "rotation": 270,
+          "rotation_method": "manual"
         }
       ]
     },
@@ -1290,8 +1298,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 270,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 180,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 24_photo_2",
@@ -1396,8 +1404,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 180,
-          "rotation_method": "face_detection"
+          "rotation": 270,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 25_photo_3",
@@ -1477,7 +1485,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 180
         },
         {
           "id": "scan 26_photo_3",
@@ -1501,7 +1510,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "face_detection"
+          "rotation_method": "manual",
+          "rotation": 90
         }
       ]
     },
@@ -1582,7 +1592,7 @@
           "flagged": false,
           "flag_reasons": [],
           "rotation": 270,
-          "rotation_method": "face_detection"
+          "rotation_method": "manual"
         }
       ]
     },
@@ -1694,7 +1704,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "face_detection"
+          "rotation_method": "manual",
+          "rotation": 180
         },
         {
           "id": "scan 29_photo_2",
@@ -1742,7 +1753,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "face_detection"
+          "rotation_method": "manual",
+          "rotation": 180
         }
       ]
     },
@@ -1773,8 +1785,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 90,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 0,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 3_photo_2",
@@ -1905,7 +1917,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         }
       ]
     },
@@ -1936,7 +1949,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 270
         },
         {
           "id": "scan 31_photo_2",
@@ -1960,7 +1974,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         },
         {
           "id": "scan 31_photo_3",
@@ -2039,7 +2054,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         },
         {
           "id": "scan 32_photo_3",
@@ -2119,8 +2135,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 90,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 180,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 33_photo_3",
@@ -2144,7 +2160,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 270
         }
       ]
     },
@@ -2175,7 +2192,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         },
         {
           "id": "scan 34_photo_2",
@@ -2199,7 +2217,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "face_detection"
+          "rotation_method": "manual",
+          "rotation": 180
         },
         {
           "id": "scan 34_photo_3",
@@ -2223,7 +2242,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         }
       ]
     },
@@ -2254,7 +2274,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         },
         {
           "id": "scan 35_photo_2",
@@ -2278,7 +2299,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         },
         {
           "id": "scan 35_photo_3",
@@ -2389,7 +2411,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 270
         }
       ]
     },
@@ -2420,8 +2443,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 90,
-          "rotation_method": "face_detection"
+          "rotation": 0,
+          "rotation_method": "manual"
         }
       ]
     },
@@ -2477,7 +2500,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "face_detection"
+          "rotation_method": "manual",
+          "rotation": 270
         },
         {
           "id": "scan 4_photo_3",
@@ -2501,8 +2525,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 180,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 270,
+          "rotation_method": "manual"
         }
       ]
     },
@@ -2533,7 +2557,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 270
         },
         {
           "id": "scan 5_photo_2",
@@ -2557,8 +2582,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 90,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 0,
+          "rotation_method": "manual"
         }
       ]
     },
@@ -2589,7 +2614,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 270
         },
         {
           "id": "scan 6_photo_2",
@@ -2613,8 +2639,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 270,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 180,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 6_photo_3",
@@ -2670,7 +2696,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 180
         },
         {
           "id": "scan 7_photo_2",
@@ -2694,7 +2721,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 270
         },
         {
           "id": "scan 7_photo_3",
@@ -2718,7 +2746,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 90
         }
       ]
     },
@@ -2829,7 +2858,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation_method": "mobilenet_v2"
+          "rotation_method": "manual",
+          "rotation": 180
         },
         {
           "id": "scan 9_photo_2",
@@ -2853,8 +2883,8 @@
           ],
           "flagged": false,
           "flag_reasons": [],
-          "rotation": 270,
-          "rotation_method": "mobilenet_v2"
+          "rotation": 0,
+          "rotation_method": "manual"
         },
         {
           "id": "scan 9_photo_3",
