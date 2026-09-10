@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Model weights
+*.onnx
+
+# Scanned photo directories
+ScanOldPhotos/
+ScanOldPhotosCropped/
+ScanOldPhotosDebug/
+
