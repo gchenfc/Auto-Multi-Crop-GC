@@ -1,0 +1,56 @@
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
+
+Copyright (c) 2026 Gerry Chen / Auto Multi-Crop GC Contributors.
+
+===============================================================================
+TERMS AND CONDITIONS FOR USE, MODIFICATION, AND DISTRIBUTION
+===============================================================================
+
+You are free to:
+
+1. **Share**: Copy and redistribute the material in any medium or format.
+2. **Adapt**: Remix, transform, and build upon the material.
+
+Under the following strict conditions:
+
+- **Attribution**: You must give appropriate credit to the original author, 
+  provide a link to the license, and indicate if changes were made. You may do 
+  so in any reasonable manner, but not in any way that suggests the licensor 
+  endorses you or your use.
+- **NonCommercial**: You MAY NOT use the material for commercial purposes of any 
+  sort, neither in original form nor in modified form. Commercial use includes, 
+  but is not limited to, selling the software, offering it as a paid service, 
+  bundling it with commercial products, or using it to generate revenue.
+- **ShareAlike**: If you remix, transform, or build upon the material, you must 
+  distribute your contributions under the exact same license (CC BY-NC-SA 4.0).
+- **No Additional Restrictions**: You may not apply legal terms or technological 
+  measures that legally restrict others from doing anything the license permits.
+
+===============================================================================
+DISCLAIMER OF WARRANTY
+===============================================================================
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR 
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES.
+
+===============================================================================
+THIRD-PARTY NOTICES & ATTRIBUTIONS
+===============================================================================
+
+This software incorporates third-party open-source libraries and model weights:
+
+1. **DuarteBarbosa EfficientNetV2 Orientation Model**
+   - Repository: https://huggingface.co/DuarteBarbosa/deep-image-orientation-detection
+   - License: MIT License
+   - Copyright (c) Duarte Barbosa
+
+2. **OpenCV (Open Source Computer Vision Library)**
+   - License: Apache License 2.0
+   - Copyright (c) OpenCV Team
+
+3. **PyTorch & Torchvision**
+   - License: BSD 3-Clause License
+   - Copyright (c) PyTorch Contributors
